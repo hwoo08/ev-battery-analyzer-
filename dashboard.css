@@ -1,0 +1,270 @@
+/* ==========================================================================
+   경로 판정 대시보드 전용 스타일
+   style.css의 토큰을 그대로 쓰고, 경로 3색만 추가로 정의합니다.
+   경로 색은 검증된 categorical 팔레트의 1·2·3번 슬롯입니다.
+   ========================================================================== */
+
+:root {
+  --route-1: #2a78d6;   /* 재제조 */
+  --route-2: #eb6834;   /* 재사용 */
+  --route-3: #1baf7a;   /* 재활용 */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --route-1: #3987e5;
+    --route-2: #d95926;
+    --route-3: #199e70;
+  }
+}
+
+:root[data-theme="dark"] {
+  --route-1: #3987e5;
+  --route-2: #d95926;
+  --route-3: #199e70;
+}
+
+/* ---------- 레이아웃 ---------- */
+.section-tight { padding: 28px 0; }
+.dash-intro { padding: 64px 0 28px; }
+.dash-intro h1 { font-size: clamp(28px, 4vw, 42px); font-weight: 700; }
+.dash-intro .lede { margin-top: 18px; }
+
+.site-nav a[aria-current="page"] { color: var(--ink); font-weight: 600; }
+
+/* ---------- 판정 흐름 ---------- */
+.flow {
+  display: flex; align-items: stretch; gap: 12px;
+  margin-top: 36px; flex-wrap: wrap;
+}
+.flow-step {
+  flex: 1 1 220px; min-width: 0;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px 20px;
+}
+.flow-num {
+  display: grid; place-items: center;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  font-size: 12px; font-weight: 700; margin-bottom: 10px;
+}
+.flow-step strong { display: block; font-size: 15px; margin-bottom: 6px; }
+.flow-step small { font-size: 12.5px; color: var(--ink-2); line-height: 1.7; }
+.flow-arrow {
+  align-self: center; color: var(--muted); font-size: 18px; flex: none;
+}
+
+/* ---------- KPI ---------- */
+.kpi-row {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+}
+.kpi {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px 20px;
+}
+.kpi-label { font-size: 12.5px; color: var(--muted); display: block; margin-bottom: 8px; }
+.kpi-value {
+  font-size: 30px; font-weight: 700; line-height: 1.1; letter-spacing: -.02em;
+  display: block;
+}
+.kpi-sub { font-size: 12.5px; color: var(--ink-2); margin-top: 6px; display: block; }
+.kpi-value .unit { font-size: 15px; font-weight: 500; color: var(--muted); margin-left: 3px; }
+
+.kpi[data-route="재제조"] .kpi-value { color: var(--route-1); }
+.kpi[data-route="재사용"] .kpi-value { color: var(--route-2); }
+.kpi[data-route="재활용"] .kpi-value { color: var(--route-3); }
+
+/* ---------- 차트 카드 ---------- */
+.chart-grid {
+  display: grid; grid-template-columns: 1.25fr .75fr; gap: 18px; align-items: start;
+}
+.chart-card { overflow: hidden; }
+.chart-head { padding: 22px 24px 0; }
+.chart-head h2 { font-size: 17px; font-weight: 600; }
+.chart-head p { margin: 7px 0 0; font-size: 13.5px; color: var(--ink-2); }
+.chart-body { padding: 20px 24px 24px; }
+
+/* ---------- 누적 막대 ---------- */
+.stack-bar {
+  display: flex; height: 46px; border-radius: 10px; overflow: hidden;
+  gap: 2px;                       /* 표면색 간격으로 조각을 분리 */
+  background: var(--surface);
+}
+.stack-seg {
+  display: grid; place-items: center; min-width: 2px;
+  font-size: 12.5px; font-weight: 600; color: #fff;
+  transition: filter .15s ease;
+}
+.stack-seg:hover { filter: brightness(1.12); }
+.stack-seg[data-route="재제조"] { background: var(--route-1); }
+.stack-seg[data-route="재사용"] { background: var(--route-2); }
+.stack-seg[data-route="재활용"] { background: var(--route-3); }
+
+/* ---------- 범례 ---------- */
+.legend {
+  display: flex; flex-wrap: wrap; gap: 8px 20px;
+  list-style: none; margin: 16px 0 0; padding: 0;
+  font-size: 13px; color: var(--ink-2);
+}
+.legend li { display: flex; align-items: center; gap: 7px; }
+.legend .swatch {
+  width: 11px; height: 11px; border-radius: 3px; flex: none;
+}
+.legend .swatch[data-route="재제조"] { background: var(--route-1); }
+.legend .swatch[data-route="재사용"] { background: var(--route-2); }
+.legend .swatch[data-route="재활용"] { background: var(--route-3); }
+
+/* ---------- 미니 표 ---------- */
+.mini-table {
+  width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px;
+}
+.mini-table th, .mini-table td {
+  padding: 9px 0; text-align: right; border-top: 1px solid var(--border);
+}
+.mini-table th:first-child, .mini-table td:first-child { text-align: left; }
+.mini-table thead th {
+  font-size: 11.5px; font-weight: 600; letter-spacing: .04em;
+  color: var(--muted); border-top: 0; text-transform: uppercase;
+}
+.mini-table td { font-variant-numeric: tabular-nums; }
+.mini-table .route-name { display: flex; align-items: center; gap: 8px; }
+
+/* ---------- 가로 막대 목록 ---------- */
+.hbar-list { display: grid; gap: 16px; }
+.hbar-row { display: grid; gap: 7px; }
+.hbar-top {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 13.5px;
+}
+.hbar-name { color: var(--ink-2); }
+.hbar-val { font-weight: 600; font-variant-numeric: tabular-nums; }
+.hbar-track { height: 8px; border-radius: 999px; background: var(--grid); overflow: hidden; }
+.hbar-fill { height: 100%; border-radius: 999px; background: var(--accent); }
+.hbar-empty { font-size: 13.5px; color: var(--muted); }
+
+/* ---------- SOH 구간 차트 ---------- */
+.soh-chart { display: grid; gap: 14px; }
+.soh-row {
+  display: grid; grid-template-columns: 96px 1fr 52px;
+  align-items: center; gap: 14px;
+}
+.soh-label { font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.soh-track {
+  display: flex; height: 22px; border-radius: 6px; overflow: hidden; gap: 2px;
+  background: var(--grid);
+}
+.soh-seg { min-width: 0; transition: filter .15s ease; }
+.soh-seg:hover { filter: brightness(1.12); }
+.soh-seg[data-route="재제조"] { background: var(--route-1); }
+.soh-seg[data-route="재사용"] { background: var(--route-2); }
+.soh-seg[data-route="재활용"] { background: var(--route-3); }
+.soh-total {
+  font-size: 12.5px; color: var(--muted); text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 핵심 사례 ---------- */
+.insight-card { padding: 24px; border-color: color-mix(in srgb, var(--warning) 40%, transparent); }
+.insight-head { display: flex; gap: 14px; align-items: flex-start; }
+.insight-icon { color: var(--warning); font-size: 17px; line-height: 1.4; flex: none; }
+.insight-head h2 { font-size: 17px; font-weight: 600; }
+.insight-head p { margin: 7px 0 0; font-size: 14px; color: var(--ink-2); }
+.insight-list {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 12px; margin-top: 20px;
+}
+.insight-item {
+  background: var(--plane); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 14px 16px;
+}
+.insight-item .ii-top {
+  display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px;
+  font-size: 13.5px; flex-wrap: wrap;
+}
+.insight-item .ii-id {
+  font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.insight-item .ii-soh {
+  color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.insight-item .ii-route {
+  margin-left: auto; font-size: 12px; color: var(--route-3);
+  font-weight: 600; white-space: nowrap;
+}
+.insight-item .ii-reason { font-size: 12.5px; color: var(--ink-2); line-height: 1.6; }
+
+/* ---------- 필터 ---------- */
+.filter-row {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 18px 24px 0;
+}
+.filter-count { font-size: 13px; color: var(--muted); margin-left: auto; }
+
+/* ---------- 데이터 표 ---------- */
+.data-table {
+  width: 100%; min-width: 900px; border-collapse: collapse; font-size: 13px;
+}
+.data-table th, .data-table td {
+  padding: 10px 14px; text-align: left; border-top: 1px solid var(--border);
+  white-space: nowrap;
+}
+.data-table th.num, .data-table td.num { text-align: right; }
+/* 120행을 페이지에 그대로 늘어놓지 않고, 표 영역 안에서 스크롤시킵니다.
+   overflow-x만 주면 세로도 스크롤 컨테이너가 되어 sticky 기준이 틀어지므로
+   높이와 overflow를 함께 명시합니다. */
+.data-scroll { max-height: 560px; overflow: auto; }
+
+.data-table thead th {
+  position: sticky; top: 0; z-index: 1;   /* 표 영역 안에서 고정 */
+  background: var(--surface-2); color: var(--muted);
+  font-size: 11.5px; font-weight: 600; letter-spacing: .04em;
+  text-transform: uppercase; cursor: pointer; user-select: none;
+  border-top: 0;
+}
+.data-table thead th[data-sort]:hover { color: var(--ink); }
+.data-table thead th[aria-sort="ascending"]::after { content: " ▲"; font-size: 9px; }
+.data-table thead th[aria-sort="descending"]::after { content: " ▼"; font-size: 9px; }
+.data-table td { font-variant-numeric: tabular-nums; }
+.data-table td.reason {
+  white-space: normal; min-width: 260px; color: var(--ink-2); font-size: 12.5px;
+}
+.data-table tbody tr:hover { background: var(--surface-2); }
+
+.route-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12.5px; font-weight: 600;
+}
+.route-chip::before {
+  content: ""; width: 9px; height: 9px; border-radius: 3px; flex: none;
+}
+.route-chip[data-route="재제조"]::before { background: var(--route-1); }
+.route-chip[data-route="재사용"]::before { background: var(--route-2); }
+.route-chip[data-route="재활용"]::before { background: var(--route-3); }
+
+.flag-unsafe {
+  display: inline-block; margin-left: 6px; font-size: 11px;
+  color: var(--critical); font-weight: 600;
+}
+.flag-down {
+  display: inline-block; margin-left: 6px; font-size: 11px;
+  color: var(--muted); font-weight: 600;
+}
+
+/* ---------- 안내 카드 ---------- */
+.notice-card { padding: 24px; }
+.notice-card h2 { font-size: 15px; font-weight: 600; margin-bottom: 14px; }
+.notice-card ul { margin: 0; padding-left: 18px; display: grid; gap: 10px; }
+.notice-card li { font-size: 13.5px; color: var(--ink-2); line-height: 1.7; }
+
+/* ---------- 반응형 ---------- */
+@media (max-width: 900px) {
+  .chart-grid { grid-template-columns: 1fr; }
+  .flow-arrow { display: none; }
+  .dash-intro { padding: 44px 0 20px; }
+}
+
+@media (max-width: 520px) {
+  .soh-row { grid-template-columns: 74px 1fr 42px; gap: 10px; }
+  .kpi-value { font-size: 25px; }
+}

@@ -1,0 +1,5 @@
+battery_id,vehicle,usage_years,mileage_km,soh_percent,avg_temp_c,max_temp_c,cell_v_max,cell_v_min,bms_error_count,fast_charge_ratio_percent,registered_at
+EV-A-001,EV A,5,120000,87.4,29,43,4.08,4.03,0,38,2026-08-30 00:00:00
+EV-B-002,EV B,7,168000,74.1,31,52,4.11,4.02,3,55,2026-08-30 00:00:00
+EV-C-003,EV C,2,38000,96.2,26,39,4.06,4.05,0,22,2026-08-30 00:00:00
+EV-D-004,EV D,9,192000,58.6,34,61,4.15,3.94,7,68,2026-08-30 00:00:00

@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# 프로그램 실행 결과물 (개인 데이터라 저장소에 올리지 않음)
+output/*
+!output/.gitkeep
+
+# OS / 에디터
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EV 배터리 잔존가치 분석기</title>
+<meta name="description" content="사용 후 전기차 배터리의 상태 데이터를 기반으로 잔존 성능과 재사용 적합성을 평가하는 프로젝트">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔋</text></svg>">
+</head>
+<body>
+
+<!--
+  ┌──────────────────────────────────────────────────────────────┐
+  │  ★ 여기만 본인 정보로 바꾸면 됩니다 ★                          │
+  │  1) 아래 data-owner 의 name / github / email                  │
+  │  2) #about 섹션의 소개 문구                                    │
+  │  나머지는 건드릴 필요 없습니다.                                 │
+  └──────────────────────────────────────────────────────────────┘
+-->
+<div id="owner"
+     data-name="김현우"
+     data-github="Hwoo08"
+     data-email="seyeongjo48@gmail.com"
+     hidden></div>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="#top">
+      <span class="brand-mark" aria-hidden="true">🔋</span>
+      <span class="brand-text">배터리 <strong>분석기</strong></span>
+    </a>
+    <nav class="site-nav">
+      <a href="#demo">단일 진단</a>
+      <a href="#method">평가 방식</a>
+      <a href="batch.html">경로 판정</a>
+      <a href="#projects">프로젝트</a>
+      <a href="#about">소개</a>
+    </nav>
+    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="라이트/다크 모드 전환">
+      <span class="theme-icon" id="theme-icon" aria-hidden="true">☀</span>
+    </button>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="wrap hero-inner">
+      <div class="hero-copy">
+        <p class="eyebrow">포트폴리오 프로젝트 · 파이썬 / 웹</p>
+        <h1>사용 후 EV 배터리의<br><span class="grad">잔존가치</span>를 평가합니다</h1>
+        <p class="lede">
+          SOH 하나만 보는 계산기가 아닙니다. 셀 전압 편차·온도 이력·BMS 오류·사용 이력까지
+          종합해 <strong>100점 만점으로 점수화</strong>하고, 배터리 재제조·재사용 관점의
+          등급으로 판정합니다.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#demo">데모 실행하기</a>
+          <a class="btn btn-ghost" href="batch.html">경로 판정 대시보드</a>
+          <a class="btn btn-ghost" id="repo-link" href="#" target="_blank" rel="noopener">GitHub 저장소</a>
+        </div>
+        <ul class="hero-facts">
+          <li><span>5</span>개 평가 항목</li>
+          <li><span>100</span>점 만점 스코어링</li>
+          <li><span>5</span>단계 재사용 등급</li>
+        </ul>
+      </div>
+
+      <div class="hero-visual" aria-hidden="true">
+        <div class="cell-stack">
+          <div class="cell" style="--fill:96%"><span>EV-C</span><i></i><b>96.2%</b></div>
+          <div class="cell" style="--fill:87%"><span>EV-A</span><i></i><b>87.4%</b></div>
+          <div class="cell" style="--fill:74%"><span>EV-B</span><i></i><b>74.1%</b></div>
+          <div class="cell" style="--fill:59%"><span>EV-D</span><i></i><b>58.6%</b></div>
+        </div>
+        <p class="cell-caption">샘플 배터리 4대의 SOH</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DEMO ============ -->
+  <section id="demo" class="section">
+    <div class="wrap">
+      <header class="section-head">
+        <p class="eyebrow">실시간 데모</p>
+        <h2>배터리 상태 진단</h2>
+        <p class="section-sub">
+          값을 입력하면 즉시 평가 결과가 계산됩니다. 서버 없이 브라우저에서 동작하며,
+          <code>main.py</code>의 평가 엔진과 동일한 로직입니다.
+        </p>
+      </header>
+
+      <div class="preset-row" role="group" aria-label="샘플 배터리 불러오기">
+        <span class="preset-label">샘플 불러오기</span>
+        <button class="chip" data-preset="A" type="button">EV-A-001</button>
+        <button class="chip" data-preset="B" type="button">EV-B-002</button>
+        <button class="chip" data-preset="C" type="button">EV-C-003</button>
+        <button class="chip" data-preset="D" type="button">EV-D-004</button>
+      </div>
+
+      <div class="demo-grid">
+
+        <!-- 입력 폼 -->
+        <form id="battery-form" class="card form-card" autocomplete="off">
+          <h3 class="card-title">배터리 정보 입력</h3>
+
+          <div class="field-grid">
+            <label class="field">
+              <span class="field-label">배터리 ID</span>
+              <input type="text" id="battery_id" value="EV-A-001">
+            </label>
+            <label class="field">
+              <span class="field-label">차량명</span>
+              <input type="text" id="vehicle" value="EV A">
+            </label>
+            <label class="field">
+              <span class="field-label">사용기간 <em>년</em></span>
+              <input type="number" id="usage_years" value="5" min="0" step="0.1">
+            </label>
+            <label class="field">
+              <span class="field-label">누적 주행거리 <em>km</em></span>
+              <input type="number" id="mileage_km" value="120000" min="0" step="1000">
+            </label>
+            <label class="field field-wide">
+              <span class="field-label">현재 SOH <em>%</em></span>
+              <div class="range-row">
+                <input type="range" id="soh_range" value="87.4" min="0" max="100" step="0.1">
+                <input type="number" id="soh_percent" value="87.4" min="0" max="100" step="0.1">
+              </div>
+            </label>
+            <label class="field">
+              <span class="field-label">평균 온도 <em>℃</em></span>
+              <input type="number" id="avg_temp_c" value="29" step="0.1">
+            </label>
+            <label class="field">
+              <span class="field-label">최고 온도 <em>℃</em></span>
+              <input type="number" id="max_temp_c" value="43" step="0.1">
+            </label>
+            <label class="field">
+              <span class="field-label">셀 최대 전압 <em>V</em></span>
+              <input type="number" id="cell_v_max" value="4.08" min="0" step="0.01">
+            </label>
+            <label class="field">
+              <span class="field-label">셀 최소 전압 <em>V</em></span>
+              <input type="number" id="cell_v_min" value="4.03" min="0" step="0.01">
+            </label>
+            <label class="field">
+              <span class="field-label">BMS 오류 <em>회</em></span>
+              <input type="number" id="bms_error_count" value="0" min="0" step="1">
+            </label>
+            <label class="field">
+              <span class="field-label">급속충전 비율 <em>%</em></span>
+              <input type="number" id="fast_charge_ratio_percent" value="38" min="0" max="100" step="1">
+            </label>
+          </div>
+
+          <p id="form-error" class="form-error" role="alert" hidden></p>
+        </form>
+
+        <!-- 결과 -->
+        <div class="card result-card viz-root" id="result">
+          <h3 class="card-title">
+            배터리 건강 진단서
+            <span class="report-id" id="r-id">EV-A-001</span>
+          </h3>
+
+          <!-- 총점 + 등급 -->
+          <div class="verdict">
+            <div class="hero-figure">
+              <span class="hero-num" id="r-total">83.5</span>
+              <span class="hero-unit">/ 100</span>
+              <span class="hero-cap">종합 점수</span>
+            </div>
+            <div class="verdict-badge" id="r-grade-badge" data-status="good">
+              <span class="badge-icon" id="r-grade-icon" aria-hidden="true">●</span>
+              <span class="badge-text">
+                <strong id="r-grade">양호</strong>
+                <small><span id="r-reuse">재사용 가능성 높음</span> · <span id="r-risk">위험도 낮음</span></small>
+              </span>
+            </div>
+          </div>
+
+          <!-- SOH 미터 -->
+          <div class="meter-block">
+            <div class="meter-head">
+              <span class="meter-name">잔존 성능 (SOH)</span>
+              <span class="meter-val"><span id="r-soh">87.4</span>%</span>
+            </div>
+            <div class="meter meter-lg"><div class="meter-fill" id="r-soh-bar" style="width:87.4%"></div></div>
+            <p class="meter-note" id="r-soh-label">배터리 건강도 양호</p>
+          </div>
+
+          <!-- 항목별 점수 -->
+          <h4 class="sub-title">항목별 점수 <span class="muted">(100점 만점)</span></h4>
+          <div class="score-list" id="score-list">
+            <!-- JS로 채워짐 -->
+          </div>
+
+          <!-- 세부 판독 -->
+          <h4 class="sub-title">세부 판독</h4>
+          <table class="detail-table">
+            <caption class="sr-only">배터리 세부 측정값과 판정</caption>
+            <tbody>
+              <tr><th scope="row">셀 전압 편차</th><td id="d-volt">50.0 mV</td><td class="td-status" id="d-volt-s">양호</td></tr>
+              <tr><th scope="row">온도 (평균/최고)</th><td id="d-temp">29.0 / 43.0 ℃</td><td class="td-status" id="d-temp-s">정상</td></tr>
+              <tr><th scope="row">BMS 오류</th><td id="d-bms">0 회</td><td class="td-status" id="d-bms-s">정상</td></tr>
+              <tr><th scope="row">사용 이력</th><td id="d-usage">5.0년 / 120,000km</td><td class="td-status" id="d-usage-s">—</td></tr>
+            </tbody>
+          </table>
+
+          <p class="disclaimer">
+            ⚠ 본 평가 기준은 특정 기업의 공식 판정 기준이 아니라,
+            이 프로젝트를 위해 자체 설계한 평가 모델입니다.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ METHOD ============ -->
+  <section id="method" class="section section-alt">
+    <div class="wrap">
+      <header class="section-head">
+        <p class="eyebrow">평가 모델</p>
+        <h2>어떻게 점수를 매기는가</h2>
+        <p class="section-sub">
+          배터리 재사용 판단에서 SOH는 가장 중요하지만 전부는 아닙니다.
+          셀 밸런싱·열 이력·BMS 이상은 안전성과 직결되므로 별도 항목으로 분리했습니다.
+        </p>
+      </header>
+
+      <div class="method-grid">
+        <article class="card method-card">
+          <div class="method-top"><span class="method-pts">40</span><span class="method-of">점</span></div>
+          <h3>SOH</h3>
+          <p>배터리 잔존 성능의 핵심 지표. <code>SOH ÷ 100 × 40</code>으로 선형 배점.</p>
+        </article>
+        <article class="card method-card">
+          <div class="method-top"><span class="method-pts">20</span><span class="method-of">점</span></div>
+          <h3>셀 전압 편차</h3>
+          <p>셀 간 불균형은 열화·안전성과 직결. 30mV 이하 만점, 120mV 초과 0점.</p>
+        </article>
+        <article class="card method-card">
+          <div class="method-top"><span class="method-pts">15</span><span class="method-of">점</span></div>
+          <h3>온도 이력</h3>
+          <p>고온 노출은 열화 가속 요인. 평균·최고 온도를 함께 판정.</p>
+        </article>
+        <article class="card method-card">
+          <div class="method-top"><span class="method-pts">15</span><span class="method-of">점</span></div>
+          <h3>BMS 오류</h3>
+          <p>셀·센서·보호회로 이상 가능성 지표. 0회 만점, 6회 이상 0점.</p>
+        </article>
+        <article class="card method-card">
+          <div class="method-top"><span class="method-pts">10</span><span class="method-of">점</span></div>
+          <h3>사용 이력</h3>
+          <p>보증 기준(8년 / 160,000km)을 100% 기준선으로 사용 강도를 반영. 급속충전 비율은 감점.</p>
+        </article>
+      </div>
+
+      <h3 class="grade-title">총점 → 재사용 등급</h3>
+      <div class="table-scroll">
+        <table class="grade-table">
+          <thead>
+            <tr><th scope="col">총점</th><th scope="col">등급</th><th scope="col">재사용 가능성</th><th scope="col">위험도</th></tr>
+          </thead>
+          <tbody>
+            <tr data-status="good"><td>90 – 100</td><td><span class="dot"></span>재사용 적합</td><td>매우 높음</td><td>매우 낮음</td></tr>
+            <tr data-status="good"><td>75 – 89</td><td><span class="dot"></span>양호</td><td>높음</td><td>낮음</td></tr>
+            <tr data-status="warning"><td>60 – 74</td><td><span class="dot"></span>추가 진단 필요</td><td>보통</td><td>보통</td></tr>
+            <tr data-status="serious"><td>40 – 59</td><td><span class="dot"></span>정밀 검사 필요</td><td>낮음</td><td>높음</td></tr>
+            <tr data-status="critical"><td>0 – 39</td><td><span class="dot"></span>재사용 부적합</td><td>매우 낮음</td><td>매우 높음</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PROJECTS ============ -->
+  <section id="projects" class="section">
+    <div class="wrap">
+      <header class="section-head">
+        <p class="eyebrow">프로젝트</p>
+        <h2>진행한 프로젝트</h2>
+      </header>
+
+      <div class="project-grid">
+        <article class="card project-card featured">
+          <div class="project-tag">대표 프로젝트</div>
+          <h3>EV Battery Residual Value Analyzer</h3>
+          <p>
+            사용 후 전기차 배터리의 BMS 데이터를 입력받아 잔존 성능과 재사용 적합성을
+            평가하는 프로그램. Python CLI로 시작해 웹으로 확장했습니다.
+          </p>
+          <ul class="tech-list">
+            <li>Python</li><li>CSV</li><li>HTML</li><li>CSS</li><li>JavaScript</li>
+          </ul>
+          <div class="project-links">
+            <a href="#demo">데모 보기</a>
+            <a class="repo-link" href="#" target="_blank" rel="noopener">소스 코드</a>
+          </div>
+        </article>
+
+        <article class="card project-card featured">
+          <div class="project-tag">신규</div>
+          <h3>자원순환 경로 판정 시스템</h3>
+          <p>
+            입고된 사용 후 배터리를 재제조·재사용·재활용 세 경로로 판정합니다.
+            안전성 게이트를 먼저 통과시켜, SOH가 높아도 셀 편차·온도·BMS 이상이 있으면
+            전기차 재투입에서 제외되도록 설계했습니다.
+          </p>
+          <ul class="tech-list">
+            <li>Python</li><li>JavaScript</li><li>CSV</li><li>데이터 시각화</li>
+          </ul>
+          <div class="project-links">
+            <a href="batch.html">대시보드 보기</a>
+            <a class="repo-link" href="#" target="_blank" rel="noopener">소스 코드</a>
+          </div>
+        </article>
+
+        <article class="card project-card is-placeholder">
+          <div class="project-tag">진행 예정</div>
+          <h3>SOH 추정 · 잔존수명(RUL) 예측</h3>
+          <p>과거 배터리 열화 데이터를 학습해 SOH를 추정하고 잔존수명을 예측하는 머신러닝 단계.</p>
+          <ul class="tech-list"><li>Python</li><li>scikit-learn</li></ul>
+          <div class="project-links"><span class="soon">준비 중</span></div>
+        </article>
+      </div>
+
+      <ol class="roadmap" aria-label="프로젝트 로드맵">
+        <li class="done"><span class="rm-step">1</span><div><strong>Python 계산 엔진</strong><small>입력 → 점수 → 판정</small></div></li>
+        <li class="done"><span class="rm-step">2</span><div><strong>웹사이트</strong><small>브라우저에서 바로 진단</small></div></li>
+        <li class="done"><span class="rm-step">3</span><div><strong>경로 판정</strong><small>재제조·재사용·재활용 분류</small></div></li>
+        <li><span class="rm-step">4</span><div><strong>AI / ML</strong><small>SOH 추정 · RUL 예측</small></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ ABOUT ============ -->
+  <section id="about" class="section section-alt">
+    <div class="wrap about-wrap">
+      <header class="section-head">
+        <p class="eyebrow">소개</p>
+        <h2 id="about-name">김현우</h2>
+      </header>
+      <!-- ★ 아래 소개 문구를 본인 것으로 바꾸세요 -->
+      <p class="about-text">
+        전기차 배터리의 순환 경제에 관심이 있어, 사용 후 배터리를 어떻게 평가하고
+        재사용할 수 있는지를 코드로 다뤄보고 있습니다. 데이터를 기준으로 판단할 수
+        있게 만드는 일에 흥미를 느낍니다.
+      </p>
+      <div class="about-links">
+        <a id="about-github" href="#" target="_blank" rel="noopener">GitHub</a>
+        <a id="about-email" href="#">Email</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <p>© <span id="year">2026</span> <span id="footer-name">김현우</span> · EV Battery Residual Value Analyzer</p>
+    <p class="footer-note">
+      평가 기준은 공개 자료를 참고해 본 프로젝트를 위해 자체 설계한 모델이며,
+      특정 기업의 공식 판정 기준이 아닙니다.
+    </p>
+  </div>
+</footer>
+
+<script src="assets/app.js"></script>
+</body>
+</html>

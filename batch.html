@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>자원순환 경로 판정 대시보드</title>
+<meta name="description" content="입고된 사용 후 전기차 배터리를 재제조·재사용·재활용 경로로 판정하고 결과를 집계하는 대시보드">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/dashboard.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔋</text></svg>">
+</head>
+<body>
+
+<div id="owner"
+     data-name="김현우"
+     data-github="hwoo08"
+     data-email="seyeongjo48@gmail.com"
+     hidden></div>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark" aria-hidden="true">🔋</span>
+      <span class="brand-text">배터리 <strong>분석기</strong></span>
+    </a>
+    <nav class="site-nav">
+      <a href="index.html#demo">단일 진단</a>
+      <a href="index.html#method">평가 방식</a>
+      <a href="batch.html" aria-current="page">경로 판정</a>
+      <a href="index.html#projects">프로젝트</a>
+    </nav>
+    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="라이트/다크 모드 전환">
+      <span class="theme-icon" id="theme-icon" aria-hidden="true">☀</span>
+    </button>
+  </div>
+</header>
+
+<main class="viz-root">
+
+  <!-- ============ 개요 ============ -->
+  <section class="section dash-intro">
+    <div class="wrap">
+      <p class="eyebrow">자원순환 경로 판정</p>
+      <h1>입고 배터리를 어디로 보낼 것인가</h1>
+      <p class="lede">
+        사용 후 배터리는 상태에 따라 <strong>재제조·재사용·재활용</strong> 세 갈래로 나뉩니다.
+        이 대시보드는 입고된 배터리를 한 번에 판정해 경로별로 분류하고,
+        <strong>SOH가 높아도 안전성 때문에 탈락하는 경우</strong>를 함께 보여줍니다.
+      </p>
+
+      <!-- 판정 흐름 -->
+      <div class="flow" role="img"
+           aria-label="판정 흐름: 입고 배터리가 안전성 게이트를 거친 뒤 SOH 기준으로 재제조, 재사용, 재활용으로 나뉩니다.">
+        <div class="flow-step">
+          <span class="flow-num">1</span>
+          <strong>안전성 게이트</strong>
+          <small>셀 편차 100mV · 최고온도 60℃ · BMS 오류 5회<br>하나라도 초과 시 SOH 무관하게 재활용</small>
+        </div>
+        <div class="flow-arrow" aria-hidden="true">→</div>
+        <div class="flow-step">
+          <span class="flow-num">2</span>
+          <strong>SOH 1차 분류</strong>
+          <small>80% 이상 → 재제조 후보<br>60~80% → 재사용<br>60% 미만 → 재활용</small>
+        </div>
+        <div class="flow-arrow" aria-hidden="true">→</div>
+        <div class="flow-step">
+          <span class="flow-num">3</span>
+          <strong>재제조 정밀 조건</strong>
+          <small>전기차 재투입 기준으로 재검<br>미충족 시 재사용으로 강등</small>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ KPI ============ -->
+  <section class="section section-tight">
+    <div class="wrap">
+      <div class="kpi-row" id="kpi-row"><!-- JS --></div>
+    </div>
+  </section>
+
+  <!-- ============ 경로별 분포 ============ -->
+  <section class="section section-tight">
+    <div class="wrap chart-grid">
+
+      <article class="card chart-card">
+        <div class="chart-head">
+          <h2>경로별 분류</h2>
+          <p>입고 배터리가 세 경로로 어떻게 나뉘었는지</p>
+        </div>
+        <div class="chart-body">
+          <div class="stack-bar" id="route-stack" role="img" aria-describedby="route-stack-table"></div>
+          <ul class="legend" id="route-legend"></ul>
+          <table class="mini-table" id="route-stack-table">
+            <caption class="sr-only">경로별 대수, 비율, 평균 SOH, 추정 잔존가치</caption>
+            <thead>
+              <tr><th scope="col">경로</th><th scope="col">대수</th><th scope="col">비율</th>
+                  <th scope="col">평균 SOH</th><th scope="col">추정 잔존가치</th></tr>
+            </thead>
+            <tbody id="route-table-body"></tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="card chart-card">
+        <div class="chart-head">
+          <h2>안전성 미달 사유</h2>
+          <p>안전성 게이트에서 걸린 항목별 건수 (한 대가 여러 항목에 걸릴 수 있음)</p>
+        </div>
+        <div class="chart-body">
+          <div class="hbar-list" id="safety-chart"></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ SOH 구간별 ============ -->
+  <section class="section section-tight">
+    <div class="wrap">
+      <article class="card chart-card">
+        <div class="chart-head">
+          <h2>SOH 구간별 경로 분포</h2>
+          <p>
+            SOH가 높으면 대체로 재제조로 가지만, <strong>80% 이상 구간에도 재활용이 섞여 있습니다.</strong>
+            안전성 게이트가 SOH 판단을 뒤집은 경우입니다.
+          </p>
+        </div>
+        <div class="chart-body">
+          <div class="soh-chart" id="soh-chart"></div>
+          <ul class="legend" id="soh-legend"></ul>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ 핵심 사례 ============ -->
+  <section class="section section-tight">
+    <div class="wrap">
+      <article class="card insight-card">
+        <div class="insight-head">
+          <span class="insight-icon" aria-hidden="true">▲</span>
+          <div>
+            <h2>SOH만 봤다면 놓쳤을 배터리</h2>
+            <p id="insight-summary"></p>
+          </div>
+        </div>
+        <div class="insight-list" id="insight-list"></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ 배터리 표 ============ -->
+  <section class="section section-tight">
+    <div class="wrap">
+      <article class="card chart-card">
+        <div class="chart-head">
+          <h2>배터리별 판정 결과</h2>
+          <p>경로를 눌러 걸러 보거나, 열 제목을 눌러 정렬할 수 있습니다.</p>
+        </div>
+
+        <div class="filter-row" role="group" aria-label="경로 필터">
+          <button class="chip" data-filter="전체" aria-pressed="true" type="button">전체</button>
+          <button class="chip" data-filter="재제조" aria-pressed="false" type="button">재제조</button>
+          <button class="chip" data-filter="재사용" aria-pressed="false" type="button">재사용</button>
+          <button class="chip" data-filter="재활용" aria-pressed="false" type="button">재활용</button>
+          <span class="filter-count" id="filter-count"></span>
+        </div>
+
+        <div class="table-scroll data-scroll">
+          <table class="data-table" id="battery-table">
+            <caption class="sr-only">입고 배터리별 상태값과 판정 경로</caption>
+            <thead>
+              <tr>
+                <th scope="col" data-sort="battery_id">배터리 ID</th>
+                <th scope="col" data-sort="vehicle">차량</th>
+                <th scope="col" data-sort="soh" class="num">SOH</th>
+                <th scope="col" data-sort="deviation_mv" class="num">셀 편차</th>
+                <th scope="col" data-sort="max_temp" class="num">최고온도</th>
+                <th scope="col" data-sort="bms_errors" class="num">BMS</th>
+                <th scope="col" data-sort="route">경로</th>
+                <th scope="col" data-sort="estimated_value_krw" class="num">추정가치</th>
+                <th scope="col">판정 사유</th>
+              </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ 면책 ============ -->
+  <section class="section section-tight">
+    <div class="wrap">
+      <div class="card notice-card">
+        <h2>데이터와 기준에 대해</h2>
+        <ul>
+          <li>
+            <strong>표시된 배터리 데이터는 합성 데이터입니다.</strong>
+            실제 차량에서 수집한 값이 아니라 <code>tools/generate_sample_data.py</code>가
+            열화 경향을 단순화해 생성한 값이며, 생성 규칙은 해당 스크립트에 공개돼 있습니다.
+          </li>
+          <li>
+            재제조 기준 <strong>SOH 80%</strong>는 포엔 관련 보도에서 언급된
+            "잔존 수명 80% 이상 선별"을 참고한 수치입니다.
+            나머지 임계값은 이 프로젝트를 위해 설계했으며,
+            <strong>특정 기업의 내부 판정 기준이 아닙니다.</strong>
+          </li>
+          <li>
+            <strong>잔존가치 단가는 가정치</strong>입니다. 경로 간 상대적 크기를 보여주기 위한
+            값이며 실제 거래가와 다릅니다. 근거와 한계는
+            <a href="docs/routing_policy.md">판정 정책 문서</a>에 정리했습니다.
+          </li>
+          <li>
+            같은 판정 로직을 Python(<code>routing.py</code>)과 웹(<code>assets/routing.js</code>)에
+            각각 구현했고, <code>tools/verify_engines.py</code>로 120대 전 항목이
+            일치하는지 검증합니다.
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <p>© <span id="year">2026</span> <span id="footer-name">김현우</span> · EV 배터리 잔존가치 분석기</p>
+    <p class="footer-note">
+      평가 기준은 공개 자료를 참고해 본 프로젝트를 위해 자체 설계한 모델이며,
+      특정 기업의 공식 판정 기준이 아닙니다.
+    </p>
+  </div>
+</footer>
+
+<script src="assets/routing.js"></script>
+<script src="assets/incoming_data.js"></script>
+<script src="assets/dashboard.js"></script>
+</body>
+</html>
